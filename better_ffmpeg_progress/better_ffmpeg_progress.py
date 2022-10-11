@@ -37,7 +37,7 @@ class FfmpegProcess:
             # pipe:1 sends the progress to stdout. See https://stackoverflow.com/a/54386052/13231825
             self._ffmpeg_args += ["-progress", "pipe:1", "-nostats"]
 
-    def run(self, progress_handler=None, ffmpeg_output_file=None, process_complete_handler=None):
+    def run(self, progress_handler=None, progress_handler_args=None, ffmpeg_output_file=None, process_complete_handler=None, process_complete_handler_args=None):
         if ffmpeg_output_file is None:
             os.makedirs("ffmpeg_output", exist_ok=True)
             ffmpeg_output_file = os.path.join("ffmpeg_output", f"[{Path(self._filepath).name}].txt")
@@ -95,12 +95,12 @@ class FfmpegProcess:
                             if speed != "0" and "N/A" not in speed:
                                 speed = float(speed)
                                 eta = (self._duration_secs - seconds_processed) / speed
-                                progress_handler(percentage, speed, eta, estimated_size)   
+                                progress_handler(percentage, speed, eta, estimated_size, progress_handler_args)   
 
             progress_bar.close()
 
             if process_complete_handler:
-                process_complete_handler()  
+                process_complete_handler(process_complete_handler_args)  
 
             print(f"To see FFmpeg's output, check out {ffmpeg_output_file}")
 
@@ -115,4 +115,3 @@ class FfmpegProcess:
             process.kill()
             print(f"[Error] {e}\nExiting Better FFmpeg Progress.")
             sys.exit()
-            
